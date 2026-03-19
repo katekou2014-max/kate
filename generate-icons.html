@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate Icons</title></head>
+<body>
+<canvas id="c192" width="192" height="192"></canvas>
+<canvas id="c512" width="512" height="512"></canvas>
+<p>Right-click each image below and save as <b>icon-192.png</b> and <b>icon-512.png</b> in the expenses folder.</p>
+<div id="out"></div>
+<script>
+function drawIcon(canvas) {
+  const ctx = canvas.getContext('2d');
+  const s = canvas.width;
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, s, s);
+  grad.addColorStop(0, '#2d1b69');
+  grad.addColorStop(1, '#1a3a5c');
+  ctx.fillStyle = grad;
+  ctx.roundRect ? ctx.roundRect(0, 0, s, s, s * 0.22) : ctx.fillRect(0, 0, s, s);
+  ctx.fill();
+  // Euro symbol
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold ${s * 0.55}px -apple-system, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('€', s / 2, s / 2 + s * 0.04);
+}
+
+['c192','c512'].forEach((id, i) => {
+  const canvas = document.getElementById(id);
+  drawIcon(canvas);
+  const img = document.createElement('img');
+  img.src = canvas.toDataURL('image/png');
+  img.style.margin = '10px';
+  img.style.border = '1px solid #ccc';
+  document.getElementById('out').appendChild(img);
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = id === 'c192' ? 'icon-192.png' : 'icon-512.png';
+  a.textContent = 'Download ' + a.download;
+  a.style.display = 'block';
+  document.getElementById('out').appendChild(a);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Daily Expenses</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1C1C1E">
+
+  <!-- iOS Safari PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Expenses">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <p class="header-greeting" id="greeting">Good morning</p>
+          <h1 class="header-date" id="header-date">Today</h1>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+            <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <p class="daily-total-label">Today</p>
+          <p class="daily-total-amount" id="daily-total">€0.00</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Anime Banner -->
+    <div class="anime-banner">
+      <svg viewBox="0 0 430 110" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="sky" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0d0221"/>
+            <stop offset="45%" stop-color="#2d1b69"/>
+            <stop offset="100%" stop-color="#1a3a5c"/>
+          </linearGradient>
+          <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fffbe6" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#fffbe6" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="white" stop-opacity="1"/>
+            <stop offset="100%" stop-color="white" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- Sky -->
+        <rect width="430" height="110" fill="url(#sky)"/>
+        <!-- Aurora streaks -->
+        <ellipse cx="150" cy="30" rx="120" ry="18" fill="#38ef7d" opacity="0.06" transform="rotate(-10 150 30)"/>
+        <ellipse cx="280" cy="20" rx="100" ry="14" fill="#7f7fd5" opacity="0.08" transform="rotate(8 280 20)"/>
+        <!-- Stars -->
+        <circle cx="18" cy="8" r="1.2" fill="white" opacity="0.9"/><circle cx="55" cy="18" r="0.8" fill="white" opacity="0.7"/>
+        <circle cx="90" cy="6" r="1.5" fill="white" opacity="0.8"/><circle cx="135" cy="14" r="0.9" fill="white" opacity="0.6"/>
+        <circle cx="175" cy="7" r="1.1" fill="white" opacity="0.85"/><circle cx="210" cy="22" r="0.7" fill="white" opacity="0.7"/>
+        <circle cx="245" cy="9" r="1.3" fill="white" opacity="0.9"/><circle cx="285" cy="17" r="0.9" fill="white" opacity="0.65"/>
+        <circle cx="38" cy="32" r="0.8" fill="white" opacity="0.6"/><circle cx="118" cy="28" r="1.0" fill="white" opacity="0.75"/>
+        <circle cx="160" cy="38" r="0.7" fill="white" opacity="0.55"/><circle cx="200" cy="32" r="1.2" fill="white" opacity="0.8"/>
+        <circle cx="258" cy="35" r="0.8" fill="white" opacity="0.6"/><circle cx="310" cy="12" r="1.1" fill="white" opacity="0.85"/>
+        <circle cx="355" cy="55" r="0.7" fill="white" opacity="0.5"/><circle cx="400" cy="10" r="1.3" fill="white" opacity="0.8"/>
+        <circle cx="420" cy="28" r="0.8" fill="white" opacity="0.65"/>
+        <!-- Moon glow -->
+        <circle cx="365" cy="30" r="38" fill="url(#moonGlow)"/>
+        <!-- Moon -->
+        <circle cx="365" cy="30" r="20" fill="#fff9e3"/>
+        <!-- Moon shadow crescent -->
+        <circle cx="373" cy="27" r="17" fill="#1e1050"/>
+        <!-- Subtle craters -->
+        <circle cx="353" cy="34" r="3" fill="#f0d080" opacity="0.25"/>
+        <circle cx="360" cy="22" r="2" fill="#f0d080" opacity="0.2"/>
+        <!-- Distant city lights glow -->
+        <ellipse cx="215" cy="108" rx="215" ry="28" fill="#7f7fd5" opacity="0.12"/>
+        <!-- Mountain silhouette left -->
+        <path d="M0 110 L0 70 L40 40 L80 58 L120 32 L165 62 L200 110 Z" fill="#0d0221" opacity="0.85"/>
+        <!-- Mountain silhouette right -->
+        <path d="M230 110 L265 58 L300 72 L335 42 L375 68 L430 50 L430 110 Z" fill="#0d0221" opacity="0.85"/>
+        <!-- Small tree left -->
+        <rect x="36" y="60" width="3" height="14" fill="#1a0533" opacity="0.9"/>
+        <ellipse cx="37" cy="56" rx="8" ry="10" fill="#1a0533" opacity="0.9"/>
+        <!-- Torii gate right -->
+        <rect x="390" y="72" width="2.5" height="22" fill="#c0392b" opacity="0.7"/>
+        <rect x="400" y="72" width="2.5" height="22" fill="#c0392b" opacity="0.7"/>
+        <rect x="386" y="72" width="30" height="4" rx="1" fill="#c0392b" opacity="0.7"/>
+        <rect x="388" y="78" width="26" height="3" rx="1" fill="#c0392b" opacity="0.5"/>
+      </svg>
+    </div>
+
+    <!-- Weather Strip -->
+    <div class="weather-strip" id="weather-strip">
+      <div class="weather-left">
+        <span class="weather-icon" id="weather-icon">⏳</span>
+        <div>
+          <p class="weather-temp" id="weather-temp">--°C</p>
+          <p class="weather-desc" id="weather-desc">Kamatero, GR</p>
+        </div>
+      </div>
+      <div class="weather-right">
+        <p class="weather-feels" id="weather-feels"></p>
+        <p class="weather-wind" id="weather-wind"></p>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- TODAY VIEW -->
+      <section class="view active" id="view-today">
+        <!-- Wallet Card -->
+        <div class="wallet-card" id="wallet-card">
+          <div class="wallet-row">
+            <div class="wallet-item" id="wallet-cash-block">
+              <span class="wallet-label">💵 Cash</span>
+              <span class="wallet-val" id="wallet-cash">€0</span>
+            </div>
+            <div class="wallet-divider"></div>
+            <div class="wallet-item" id="wallet-bank-block">
+              <span class="wallet-label">💳 Bank</span>
+              <span class="wallet-val" id="wallet-bank">€0</span>
+            </div>
+            <div class="wallet-divider"></div>
+            <div class="wallet-item">
+              <span class="wallet-label">📉 Spent</span>
+              <span class="wallet-val wallet-spent" id="wallet-spent">€0</span>
+            </div>
+          </div>
+          <button class="wallet-edit-btn" id="wallet-edit-btn">Edit balances</button>
+        </div>
+        <div id="expenses-list"></div>
+      </section>
+
+      <!-- HISTORY VIEW -->
+      <section class="view" id="view-history">
+        <div id="history-content"></div>
+      </section>
+
+      <!-- SUMMARY VIEW -->
+      <section class="view" id="view-summary">
+        <div id="summary-content"></div>
+      </section>
+
+    </main>
+
+    <!-- Tab Bar -->
+    <nav class="tab-bar">
+      <button class="tab-item active" data-tab="today">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Today</span>
+      </button>
+      <button class="tab-item" data-tab="history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+        <span>History</span>
+      </button>
+      <button class="tab-item" data-tab="summary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Summary</span>
+      </button>
+    </nav>
+
+    <!-- FAB Group -->
+    <div class="fab-group">
+      <button class="fab fab-mic" id="fab-mic-btn" title="Speak an expense">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <button class="fab" id="fab-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+
+    <!-- Voice Toast -->
+    <div class="voice-toast" id="voice-toast"></div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal" id="modal">
+        <div class="modal-handle"></div>
+
+        <div class="modal-header">
+          <h2 id="modal-header-title">New Expense</h2>
+          <button class="modal-close" id="modal-close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- Voice input -->
+          <button class="voice-btn" id="voice-btn" title="Speak your expense">
+            <svg id="voice-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <span id="voice-label">Tap to speak</span>
+          </button>
+          <p class="voice-hint" id="voice-hint">e.g. "50 euro gas cash"</p>
+
+          <!-- Amount -->
+          <div class="amount-row">
+            <span class="currency">€</span>
+            <input type="number" id="amount-input" class="amount-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+          </div>
+
+          <!-- Category -->
+          <p class="field-label">Category</p>
+          <div class="category-grid" id="category-grid"></div>
+
+          <!-- Payment Method -->
+          <p class="field-label">Paid with</p>
+          <div class="payment-toggle">
+            <button class="pay-btn active" data-method="cash">
+              <span class="pay-icon">💵</span>
+              <span>Cash</span>
+            </button>
+            <button class="pay-btn" data-method="card">
+              <span class="pay-icon">💳</span>
+              <span>Bank / Card</span>
+            </button>
+          </div>
+
+          <!-- Date -->
+          <p class="field-label">Date</p>
+          <input type="date" id="date-input" class="note-input date-input">
+
+          <!-- Note -->
+          <p class="field-label">Note <span class="optional">optional</span></p>
+          <input type="text" id="note-input" class="note-input" placeholder="What was it for?">
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="add-btn" id="add-btn">Add Expense</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Category Modal -->
+    <div class="modal-overlay" id="newcat-overlay">
+      <div class="modal" id="newcat-modal">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <h2>New Category</h2>
+          <button class="modal-close" id="newcat-close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="field-label">Emoji Icon</p>
+          <input type="text" id="new-cat-icon" class="note-input newcat-emoji" placeholder="e.g. 🎓" maxlength="2">
+
+          <p class="field-label" style="margin-top:20px">Name</p>
+          <input type="text" id="new-cat-name" class="note-input" placeholder="e.g. Education" maxlength="14">
+
+          <p class="field-label" style="margin-top:20px">Color</p>
+          <div class="color-picker" id="color-picker"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="add-btn" id="save-new-cat">Add Category</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wallet Edit Sheet -->
+    <div class="sheet-overlay" id="wallet-overlay">
+      <div class="sheet">
+        <p class="sheet-title">Your Balances</p>
+        <p class="sheet-subtitle">Set your available funds</p>
+        <div class="wallet-inputs">
+          <label class="wallet-input-label">
+            <span>💵 Available Cash</span>
+            <div class="wallet-input-row">
+              <span class="wallet-input-cur">€</span>
+              <input type="number" id="input-cash" class="wallet-input" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+            </div>
+          </label>
+          <label class="wallet-input-label">
+            <span>💳 Available in Bank</span>
+            <div class="wallet-input-row">
+              <span class="wallet-input-cur">€</span>
+              <input type="number" id="input-bank" class="wallet-input" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+            </div>
+          </label>
+        </div>
+        <button class="sheet-btn" style="background:var(--primary);color:white;font-weight:600" id="save-wallet">Save</button>
+        <button class="sheet-btn" id="cancel-wallet">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Expense Action Sheet -->
+    <div class="sheet-overlay" id="action-overlay">
+      <div class="sheet">
+        <p class="sheet-title" id="action-sheet-title">Expense</p>
+        <p class="sheet-subtitle" id="action-sheet-subtitle"></p>
+        <button class="sheet-btn" id="action-edit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:8px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+        <button class="sheet-btn danger" id="action-delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:8px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Delete
+        </button>
+        <button class="sheet-btn" id="action-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Delete Confirm Sheet -->
+    <div class="sheet-overlay" id="delete-overlay">
+      <div class="sheet">
+        <p class="sheet-title">Delete Expense?</p>
+        <p class="sheet-subtitle">This action cannot be undone.</p>
+        <button class="sheet-btn danger" id="confirm-delete">Delete</button>
+        <button class="sheet-btn" id="cancel-delete">Cancel</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
