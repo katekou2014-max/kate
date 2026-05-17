@@ -78,6 +78,41 @@ body {
   overscroll-behavior: none;
 }
 
+/* ===== DESKTOP FRAME ===== */
+@media (min-width: 600px) {
+  html, body {
+    background: #0d0d1a;
+    background-image:
+      radial-gradient(ellipse at 25% 60%, rgba(40,20,100,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 25%, rgba(10,60,120,0.45) 0%, transparent 50%);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 0 40px;
+  }
+
+  .app {
+    border-radius: 50px;
+    box-shadow:
+      0 0 0 2px #2a2a4e,
+      0 0 0 12px #111128,
+      0 0 0 14px #2a2a4e,
+      0 40px 100px rgba(0,0,0,0.85),
+      0 0 80px rgba(10,132,255,0.06);
+    min-height: unset;
+    height: 844px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* makes all position:fixed children anchor to this frame, not the viewport */
+    transform: translate(0, 0);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .app::-webkit-scrollbar { display: none; }
+}
+
 button { cursor: pointer; font-family: inherit; }
 input  { font-family: inherit; }
 
@@ -89,6 +124,7 @@ input  { font-family: inherit; }
   max-width: 430px;
   margin: 0 auto;
   position: relative;
+  background: var(--bg);
 }
 
 /* ===== HEADER ===== */
@@ -566,6 +602,27 @@ input  { font-family: inherit; }
 }
 
 .note-input::placeholder { color: var(--text-3); }
+
+/* Recurring toggle */
+.recurring-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 4px;
+}
+.recurring-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.recurring-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
 
 /* Modal Footer */
 .modal-footer {

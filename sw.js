@@ -1,4 +1,4 @@
-const CACHE = 'expenses-v1';
+const CACHE = 'expenses-v2';
 const FILES = ['/kate/', '/kate/index.html', '/kate/style.css', '/kate/app.js', '/kate/manifest.json'];
 
 self.addEventListener('install', e => {

@@ -66,6 +66,40 @@ function removeExpense(id) {
   saveData(d);
 }
 
+// ============================================================
+//  RECURRING SUBSCRIPTIONS
+// ============================================================
+function getSubscriptions() {
+  try { return JSON.parse(localStorage.getItem('expenses_subscriptions') || '[]'); }
+  catch { return []; }
+}
+function saveSubscriptions(subs) {
+  localStorage.setItem('expenses_subscriptions', JSON.stringify(subs));
+}
+
+// Auto-add recurring subscriptions for the current month if not already added
+function syncSubscriptions() {
+  const monthKey = todayStr().slice(0, 7); // "YYYY-MM"
+  const subs = getSubscriptions();
+  if (!subs.length) return;
+  const existing = getData().expenses;
+  subs.forEach(sub => {
+    const alreadyAdded = existing.some(e => e.subId === sub.id && e.date.startsWith(monthKey));
+    if (!alreadyAdded) {
+      addExpense({
+        id: uid(),
+        subId: sub.id,
+        date: monthKey + '-01',
+        amount: sub.amount,
+        category: sub.category,
+        paymentMethod: sub.paymentMethod,
+        note: sub.note || sub.name,
+        createdAt: Date.now(),
+      });
+    }
+  });
+}
+
 function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
@@ -399,6 +433,7 @@ function renderCategoryGrid() {
     btn.addEventListener('click', () => {
       selectedCat = btn.dataset.cat;
       renderCategoryGrid();
+      updateRecurringRow();
     });
     // Delete custom category on ✕ badge click
     const badge = btn.querySelector('.custom-badge');
@@ -476,6 +511,11 @@ function shake(el) {
 // ============================================================
 //  MODAL  (new + edit)
 // ============================================================
+function updateRecurringRow() {
+  const row = document.getElementById('recurring-row');
+  row.style.display = selectedCat === 'subscriptions' ? 'flex' : 'none';
+}
+
 function openModal(prefill = null) {
   editingId      = null;
   selectedCat    = prefill?.category    || null;
@@ -486,9 +526,11 @@ function openModal(prefill = null) {
   document.getElementById('date-input').value   = todayStr();
   document.getElementById('modal-header-title').textContent = 'New Expense';
   document.getElementById('add-btn').textContent = 'Add Expense';
+  document.getElementById('recurring-check').checked = false;
 
   renderCategoryGrid();
   syncPaymentBtns();
+  updateRecurringRow();
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(() => document.getElementById('amount-input').focus(), 420);
 }
@@ -506,9 +548,11 @@ function openEditModal(id) {
   document.getElementById('date-input').value   = exp.date;
   document.getElementById('modal-header-title').textContent = 'Edit Expense';
   document.getElementById('add-btn').textContent = 'Save Changes';
+  document.getElementById('recurring-check').checked = false;
 
   renderCategoryGrid();
   syncPaymentBtns();
+  updateRecurringRow();
   document.getElementById('modal-overlay').classList.add('open');
 }
 
@@ -527,12 +571,14 @@ function syncPaymentBtns() {
 //  ADD / SAVE EXPENSE
 // ============================================================
 function handleAdd() {
-  const amount = parseFloat(document.getElementById('amount-input').value);
+  const raw    = document.getElementById('amount-input').value.replace(',', '.');
+  const amount = parseFloat(raw);
   if (!amount || amount <= 0) { shake(document.getElementById('amount-input')); return; }
   if (!selectedCat)           { shake(document.getElementById('category-grid')); return; }
 
-  const note = document.getElementById('note-input').value.trim();
-  const date = document.getElementById('date-input').value || todayStr();
+  const note      = document.getElementById('note-input').value.trim();
+  const date      = document.getElementById('date-input').value || todayStr();
+  const recurring = selectedCat === 'subscriptions' && document.getElementById('recurring-check').checked;
 
   if (editingId) {
     const d = getData();
@@ -542,7 +588,13 @@ function handleAdd() {
       saveData(d);
     }
   } else {
-    addExpense({ id: uid(), date, amount, category: selectedCat, paymentMethod: selectedMethod, note, createdAt: Date.now() });
+    const expId = uid();
+    addExpense({ id: expId, date, amount, category: selectedCat, paymentMethod: selectedMethod, note, createdAt: Date.now() });
+    if (recurring) {
+      const subs = getSubscriptions();
+      subs.push({ id: expId, amount, category: selectedCat, paymentMethod: selectedMethod, note: note || 'Subscription', name: note || 'Subscription' });
+      saveSubscriptions(subs);
+    }
   }
 
   closeModal();
@@ -598,9 +650,17 @@ function closeDeleteSheet() {
 // ============================================================
 //  MAIN-PAGE VOICE (auto-submit on "add …")
 // ============================================================
+function isIosSafari() {
+  return /iP(hone|ad|od)/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS/.test(navigator.userAgent);
+}
+
 function startMainVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) { alert('Voice not supported. Try Chrome or Edge.'); return; }
+  if (!SpeechRecognition) { alert('Voice not supported in this browser.'); return; }
+  if (isIosSafari() && location.protocol !== 'https:') {
+    alert('Microphone requires HTTPS on iPhone.\nOpen the app via Safari → type the address as:\nhttps://…\nor use the GitHub Pages link.');
+    return;
+  }
 
   const btn = document.getElementById('fab-mic-btn');
   btn.classList.add('listening');
@@ -645,8 +705,12 @@ function startMainVoice() {
     }
   };
 
-  rec.onerror = () => {
-    showToast('⚠️ Could not hear — try again');
+  rec.onerror = (e) => {
+    if (e.error === 'not-allowed') {
+      showToast('🔒 Mic blocked — HTTPS needed on iPhone');
+    } else {
+      showToast('⚠️ Could not hear — try again');
+    }
   };
 
   rec.onend = () => {
@@ -746,11 +810,14 @@ function saveWallet(w) {
 }
 
 function renderWallet() {
-  const w     = getWallet();
-  const spent = getTodayExpenses().reduce((s, e) => s + e.amount, 0);
-  document.getElementById('wallet-cash').textContent  = fmt(w.cash);
-  document.getElementById('wallet-bank').textContent  = fmt(w.bank);
-  document.getElementById('wallet-spent').textContent = fmt(spent);
+  const w        = getWallet();
+  const all      = getData().expenses;
+  const cashSpent = all.filter(e => e.paymentMethod === 'cash').reduce((s, e) => s + e.amount, 0);
+  const bankSpent = all.filter(e => e.paymentMethod === 'card').reduce((s, e) => s + e.amount, 0);
+  const todaySpent = getTodayExpenses().reduce((s, e) => s + e.amount, 0);
+  document.getElementById('wallet-cash').textContent  = fmt(Math.max(0, w.cash - cashSpent));
+  document.getElementById('wallet-bank').textContent  = fmt(Math.max(0, w.bank - bankSpent));
+  document.getElementById('wallet-spent').textContent = fmt(todaySpent);
 }
 
 function openWalletSheet() {
@@ -854,7 +921,11 @@ function parseVoiceInput(text) {
 function startVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    alert('Voice input is not supported in this browser. Try Chrome or Edge.');
+    alert('Voice input is not supported in this browser.');
+    return;
+  }
+  if (isIosSafari() && location.protocol !== 'https:') {
+    alert('Microphone requires HTTPS on iPhone.\nOpen the app via the GitHub Pages link instead.');
     return;
   }
 
@@ -883,10 +954,10 @@ function startVoice() {
     if (parsed.paymentMethod) { selectedMethod = parsed.paymentMethod; syncPaymentBtns(); }
   };
 
-  rec.onerror = () => {
+  rec.onerror = (e) => {
     btn.classList.remove('listening');
     label.textContent = 'Tap to speak';
-    hint.textContent  = 'Could not hear you — try again';
+    hint.textContent  = e.error === 'not-allowed' ? '🔒 Mic blocked — HTTPS needed on iPhone' : 'Could not hear you — try again';
   };
 
   rec.onend = () => {
@@ -908,6 +979,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initTheme();
   fetchWeather();
+  syncSubscriptions();
   renderWallet();
 
   // Wallet sheet
